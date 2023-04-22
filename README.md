@@ -1,2 +1,8 @@
 # Capivara-Run
-Jogo do dinossauro, só que com capivara e algo extra.
+## Jogo altamente inspirado no "Jogo do dinossauro" do Google
+
+Projeto realizado para um trabalho escolar de ensino médio.
+
+Observações: 
+  * Primeiro jogo que já fiz, logo não está optimizado do jeito que deveria ser.
+  * Preste atenção nos cantos da tela ao iniciar o jogo, existe um Easter egg!
