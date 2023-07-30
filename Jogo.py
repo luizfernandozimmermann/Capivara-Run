@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+
+from Capivara import Capivara
 from classes import *
 from random import randint
 from sys import exit
@@ -31,8 +33,7 @@ class Jogo():
         self.som_morte = pygame.mixer.Sound("audios/morte.wav")
         self.som_morte.set_volume(0.1)
 
-        self.som_pulo = pygame.mixer.Sound("audios/pulo.wav")
-        self.som_pulo.set_volume(0.8)
+        
 
         self.som_onça_chegando = pygame.mixer.Sound("audios/onça_chegando.wav")
         self.som_onça_chegando.set_volume(0.1)
@@ -60,15 +61,11 @@ class Jogo():
         colisão_com_cacto = False
         vidas_capivara = 3
         pisando = True
-        capivara = Capivara()
-        altura_capivara = self.altura_tela - 400
-        aceleração_capivara_y = 0
-        capivara_pisou_na_terra = 3
+        capivara = Capivara(self.altura_tela - 400)
         morte = False
 
         # animação inicial
         capivara_posição_x = 480
-        altura_capivara = self.altura_tela - 220
         velocidade_capivara_x = 1
         velocidade_capivara_y = 0
         contagem = 0
@@ -206,7 +203,7 @@ class Jogo():
                     contagem += 1
                     if contagem == 240:
                         capivara.image = pygame.transform.flip(capivara.image, True, False)
-                        aceleração_capivara_y = -25
+                        capivara.aceleracao_y = -25
                         velocidade_fundo = 8
                         velocidade_capivara_x = -6
                     elif contagem < 240:
@@ -225,12 +222,12 @@ class Jogo():
                     self.tela.blit(onça.image, (onça.posição[0], onça.posição[1]))
 
                 if contagem > 240:
-                    aceleração_capivara_y += 0.5
+                    capivara.aceleracao_y += 0.5
                 
                 # fim da animação
-                if altura_capivara > self.altura_tela - 120 -180 and contagem > 260 and aceleração_capivara_y > 0:
-                    aceleração_capivara_y = 0
-                    altura_capivara = self.altura_tela - 120 - 180
+                if capivara.rect.y > self.altura_tela - 120 -180 and contagem > 260 and capivara.aceleracao_y > 0:
+                    capivara.aceleracao_y = 0
+                    capivara.rect.y = self.altura_tela - 120 - 180
                     inicio = False
                     velocidade_fundo = 5.5
                     if tocar_amogus:       
@@ -245,17 +242,17 @@ class Jogo():
                             musica_de_fundo = pygame.mixer.music.load("audios/musica_de_fundo.mp3")
                             pygame.mixer.music.play(-1)  
                 
-                if aceleração_capivara_y != 0:
+                if capivara.aceleracao_y != 0:
                     capivara.mover = True
                     capivara.update()
 
-                altura_capivara += aceleração_capivara_y
+                capivara.rect.y += capivara.aceleracao_y
                 if capivara_posição_x > 200:
                     capivara_posição_x += velocidade_capivara_x
                 elif capivara_posição_x > 200:
                     velocidade_capivara_x = 0
                     capivara_posição_x = 200
-                self.tela.blit(capivara.image, (capivara_posição_x, altura_capivara))
+                self.tela.blit(capivara.image, (capivara_posição_x, capivara.rect.y))
 
                 # carrega as aguas
                 for c in range(0, len(aguas)):
@@ -276,6 +273,7 @@ class Jogo():
             else:
                 dentro2 = False
 
+            # O JOGO TA AQUI XDD
             if not pausado and not inicio and not morte:
                 abriu_agora = False
                 # movimentação da tela de fundo e nuvens
@@ -327,32 +325,25 @@ class Jogo():
                     pass
 
                 # gravidade
-                pisando = False
-                for c in range(0, len(solos)):
-                    if solos[c].posição[0] <= 100 <= solos[c].posição[0] + 240 and solos[c].posição[1] <= altura_capivara + 180:
-                        pisando = True
-                        capivara_pisou_na_terra = c
-                        break
-                
-                if not pisando:
-                    aceleração_capivara_y += 0.5
+                if capivara.rect.y + capivara.rect.height < self.altura_tela - 120:
+                    capivara.pulando = True
+                    capivara.cair()
+                else:
+                    capivara.zerar_gravidade()
 
                 # pulo
-                if not reinicio_agora and pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_SPACE] or pygame.key.get_pressed()[K_UP] or pygame.mouse.get_pressed()[0]:
-                    if pisando:
-                        aceleração_capivara_y = -19
-                        self.som_pulo.play()
-
-                    # começo do jogo
-                    if velocidade_fundo == 0:
-                        velocidade_fundo = 5.5
-                        capivara.mover = True
+                pular = pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_SPACE] or \
+                    pygame.key.get_pressed()[K_UP] or pygame.mouse.get_pressed()[0]
+                if not capivara.pulando and pular:
+                    capivara.pular()
+                    
+                
 
                 # define a altura da capivara, mantendo ela em cima da terra
-                altura_capivara += int(aceleração_capivara_y)
-                if altura_capivara + 180 > solos[0].posição[1]:
-                    altura_capivara = solos[0].posição[1] - 180
-                    aceleração_capivara_y = 0
+                capivara.rect.y += int(capivara.aceleracao_y)
+                if capivara.rect.y + 180 > solos[0].posição[1]:
+                    capivara.rect.y = solos[0].posição[1] - 180
+                    capivara.aceleracao_y = 0
 
 
                 # cactos
@@ -395,10 +386,10 @@ class Jogo():
                 # colisão com cacto
                 if len(cactos_colocados_em_campo) > 0:
                     for c in range(0, len(cactos_colocados_em_campo)):
-                        if cactos_colocados_em_campo[c].posição[0] <= 160 + capivara.tamanho[0] <= cactos_colocados_em_campo[c].posição[0] + cactos_colocados_em_campo[c].tamanho[0] and cactos_colocados_em_campo[c].posição[1] <= altura_capivara + capivara.tamanho[1] <= cactos_colocados_em_campo[c].posição[1] + cactos_colocados_em_campo[c].tamanho[1] and not colisão_com_cacto:
+                        if cactos_colocados_em_campo[c].posição[0] <= 160 + capivara.tamanho[0] <= cactos_colocados_em_campo[c].posição[0] + cactos_colocados_em_campo[c].tamanho[0] and cactos_colocados_em_campo[c].posição[1] <= capivara.rect.y + capivara.tamanho[1] <= cactos_colocados_em_campo[c].posição[1] + cactos_colocados_em_campo[c].tamanho[1] and not colisão_com_cacto:
                             colisão_com_cacto = True
                             vidas_capivara -= 1
-                        elif altura_capivara + capivara.tamanho[1] - 60 >= cactos_colocados_em_campo[c].posição[1] and not colisão_com_cacto:
+                        elif capivara.rect.y + capivara.tamanho[1] - 60 >= cactos_colocados_em_campo[c].posição[1] and not colisão_com_cacto:
                             if 260 <= cactos_colocados_em_campo[c].posição[0] <= 140 + capivara.tamanho[0] or 260 <= cactos_colocados_em_campo[c].posição[0] + cactos_colocados_em_campo[c].tamanho[0] <= 140 + capivara.tamanho[0]:
                                 colisão_com_cacto = True
                                 vidas_capivara -= 1
@@ -433,7 +424,7 @@ class Jogo():
                     cajuzinho_extra.posição[0] -= velocidade_fundo
                     self.tela.blit(cajuzinho_extra.image, (cajuzinho_extra.posição[0], cajuzinho_extra.posição[1]))
 
-                if 200 <= cajuzinho_extra.posição[0] <= 380 and altura_capivara <= cajuzinho_extra.posição[1] <= altura_capivara + 180:
+                if 200 <= cajuzinho_extra.posição[0] <= 380 and capivara.rect.y <= cajuzinho_extra.posição[1] <= capivara.rect.y + 180:
                     cajuzinho_extra.posição[0] = self.largura_tela
                     vidas_capivara += 1
                     cajuzinho_extra_na_tela = False
@@ -468,8 +459,8 @@ class Jogo():
                 self.tela.blit(botão_pausar.image, (botão_pausar.posição[0], botão_pausar.posição[1]))
                 self.tela.blit(pontuação_texto, (20, self.altura_tela - 60))
                 self.tela.blit(pontuação_maxima_texto, (self.largura_tela // 2, self.altura_tela - 60))
-                capivara.rect.topleft = (200, altura_capivara)
-                self.tela.blit(capivara.image, (200, altura_capivara))
+                capivara.rect.topleft = (200, capivara.rect.y)
+                self.tela.blit(capivara.image, (200, capivara.rect.y))
 
             elif pausado and not inicio or morte:
                 self.tela.blit(logo.image, (self.largura_tela // 2 - logo.tamanho // 2, -logo.tamanho // 5))
@@ -515,7 +506,7 @@ class Jogo():
 
                         inicio = True
                         capivara_posição_x = 480
-                        altura_capivara = self.altura_tela - 220
+                        capivara.rect.y = self.altura_tela - 220
                         velocidade_capivara_x = 1
                         velocidade_capivara_y = 0
                         contagem = 0

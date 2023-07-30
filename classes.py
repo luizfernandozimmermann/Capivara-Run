@@ -1,37 +1,5 @@
 import pygame
 
-class Capivara(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.imagens_animacoes = []
-        for c in range(0, 5):
-            imagem = pygame.image.load("sprites/capivarinha_" + str(c) + ".png").convert_alpha()
-            imagem = pygame.transform.scale(imagem, (180, 180))
-            self.imagens_animacoes.append(imagem)
-        self.atual = 0
-        self.image = self.imagens_animacoes[self.atual]
-        self.image = pygame.transform.scale(self.image, (180, 180))
-        self.mover = False
-        self.tamanho = [180, 180]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (0, 0)
-
-    def transformar_amogus(self):
-        self.imagens_animacoes = []
-        for c in range(0, 5):
-            imagem = pygame.image.load("sprites/amogus_" + str(c) + ".png").convert_alpha()
-            imagem = pygame.transform.scale(imagem, (180, 180))
-            self.imagens_animacoes.append(imagem)
-
-    def update(self):
-        if self.mover:
-            self.atual += 0.1
-            if self.atual >= 4:
-                self.atual = 0
-            self.image = self.imagens_animacoes[int(self.atual)]
-            self.image = pygame.transform.scale(self.image, (180, 180))
-
 class Fundo(pygame.sprite.Sprite):
     def __init__(self, x, altura_tela, imagem):
         pygame.sprite.Sprite.__init__(self)
