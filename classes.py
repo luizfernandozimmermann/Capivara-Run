@@ -1,0 +1,131 @@
+import pygame
+
+class Capivara(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.imagens_animacoes = []
+        for c in range(0, 5):
+            imagem = pygame.image.load("sprites/capivarinha_" + str(c) + ".png").convert_alpha()
+            imagem = pygame.transform.scale(imagem, (180, 180))
+            self.imagens_animacoes.append(imagem)
+        self.atual = 0
+        self.image = self.imagens_animacoes[self.atual]
+        self.image = pygame.transform.scale(self.image, (180, 180))
+        self.mover = False
+        self.tamanho = [180, 180]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+
+    def transformar_amogus(self):
+        self.imagens_animacoes = []
+        for c in range(0, 5):
+            imagem = pygame.image.load("sprites/amogus_" + str(c) + ".png").convert_alpha()
+            imagem = pygame.transform.scale(imagem, (180, 180))
+            self.imagens_animacoes.append(imagem)
+
+    def update(self):
+        if self.mover:
+            self.atual += 0.1
+            if self.atual >= 4:
+                self.atual = 0
+            self.image = self.imagens_animacoes[int(self.atual)]
+            self.image = pygame.transform.scale(self.image, (180, 180))
+
+class Fundo(pygame.sprite.Sprite):
+    def __init__(self, x, altura_tela, imagem):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.altura = altura_tela
+
+        self.image = pygame.image.load("sprites/" + str(imagem) + ".png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.altura, self.altura))
+        if imagem == "tela_de_fundo":
+            self.posição = [x, -120]
+        else:
+            self.posição = [x, 0]
+
+class Chão(pygame.sprite.Sprite):
+    def __init__(self, altura_tela):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("sprites/terra.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (240, 120))
+        self.posição = [0, altura_tela - 120]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (self.posição[0], self.posição[1])
+
+class Cacto(pygame.sprite.Sprite):
+    def __init__(self, imagem, tamanho, largura_tela, altura_tela, proporção_altura=1, proporção_largura=1):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.proporção = proporção_altura
+        self.largura = proporção_largura
+        self.tamanho = [tamanho * proporção_largura, tamanho * proporção_altura]
+        self.image = pygame.image.load("sprites/cacto_" + str(imagem) + ".png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.tamanho[0], self.tamanho[1]))
+        self.posição = [largura_tela, altura_tela - self.tamanho[0] - 110 - tamanho * (proporção_altura - 1)]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (self.posição[0], self.posição[1])
+
+class Botão(pygame.sprite.Sprite):
+    def __init__(self, imagem, x, y, tamanho):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.tamanho = tamanho
+        self.posição = [x, y]
+        self.image = pygame.image.load("sprites/botão_" + str(imagem) + ".png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (tamanho, tamanho))
+
+class Cajuzinho(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("sprites/cajuzinho.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (100, 100))
+
+def texto(texto):
+    fonte = pygame.font.SysFont("Emulogic Regular", 60, True, False)
+    texto_formatado = fonte.render(texto, True, (0, 0, 0))
+    return texto_formatado
+
+class Cajuzinho_extra(pygame.sprite.Sprite):
+    def __init__(self, posição_x, posição_y):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.posição = [posição_x, posição_y]
+        self.image = pygame.image.load("sprites/cajuzinho.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (80, 80))
+
+class Onça(pygame.sprite.Sprite):
+    def __init__(self, posição_x, posição_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.posição = [posição_x, posição_y]
+        self.image = pygame.image.load("imagens_animação/onça_pintada.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (200, 200))
+
+class Agua(pygame.sprite.Sprite):
+    def __init__(self, imagem, posição_x, posição_y):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.posição = [posição_x, posição_y]
+        self.image = pygame.image.load("imagens_animação/" + str(imagem) + ".png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (240, 120))
+
+class Easter_egg(pygame.sprite.Sprite):
+    def __init__(self, posição_x, posição_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("imagens_animação/easter_egg.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (80, 80))
+        self.posição = [posição_x, posição_y]
+
+class Logo(pygame.sprite.Sprite):
+    def __init__(self, tamanho):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("sprites/logo.png").convert_alpha()
+        self.tamanho = tamanho
+        self.image = pygame.transform.scale(self.image, (tamanho, tamanho))
+
+    def amogus(self):
+        self.image = pygame.image.load("sprites/logo_sus.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
