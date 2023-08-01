@@ -5,6 +5,9 @@ class Capivara(pygame.sprite.Sprite):
     velocidade_y = 0
     morta = False
     pulando = False
+    vidas = 3
+    movendo = False
+    atual = 0
 
     def __init__(self, altura_inicial):
         pygame.sprite.Sprite.__init__(self)
@@ -12,18 +15,28 @@ class Capivara(pygame.sprite.Sprite):
         self.som_pulo.set_volume(0.8)
         
         self.imagens_animacoes = []
-        for c in range(0, 5):
-            imagem = pygame.image.load("sprites/capivarinha_" + str(c) + ".png").convert_alpha()
-            imagem = pygame.transform.scale(imagem, (180, 180))
-            self.imagens_animacoes.append(imagem)
+        imagem0 = pygame.image.load("sprites/capivara/capivarinha_0.png").convert_alpha()
+        self.imagens_animacoes.append(imagem0)
 
-        self.atual = 0
+        imagem1 = pygame.image.load("sprites/capivara/capivarinha_1.png").convert_alpha()
+        self.imagens_animacoes.append(imagem1)
+        self.imagens_animacoes.append(imagem0)
+
+        imagem1 = pygame.image.load("sprites/capivara/capivarinha_2.png").convert_alpha()
+        self.imagens_animacoes.append(imagem1)
+        self.imagens_animacoes.append(imagem0)
+
+        for pos, imagem in enumerate(self.imagens_animacoes):
+            self.imagens_animacoes[pos] = pygame.transform.scale(imagem, (180, 180))
+
         self.image = self.imagens_animacoes[self.atual]
-        self.image = pygame.transform.scale(self.image, (180, 180))
-        self.movendo = False
-        self.tamanho = self.image.get_size()
         self.rect = self.image.get_rect()
         self.rect.y = altura_inicial
+
+    def resetar_atributos(self):
+        self.zerar_gravidade()
+        self.morta = False
+        self.vidas = 3
 
     def transformar_amogus(self):
         self.imagens_animacoes = []
