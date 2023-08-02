@@ -61,7 +61,7 @@ class Jogo():
         # capivara
         imagem_vazio = pygame.image.load("sprites/vazio.png").convert_alpha()
         colisão_com_cacto = False
-        capivara = Capivara(self.altura_tela - 400)
+        capivara = Capivara(self.altura_tela - 301)
         morte = False
 
         
@@ -84,7 +84,7 @@ class Jogo():
         # Terrenos
         fundos = []
         nuvens = []
-        quantidade_imagens_fundo = math.ceil(self.largura_tela / self.altura_tela)
+        quantidade_imagens_fundo = math.ceil(self.largura_tela / self.altura_tela) + 1
         for i in range(0, quantidade_imagens_fundo):
             posicao_x = i * self.altura_tela
             fundo = FundoTerreno(posicao_x, self.altura_tela)
@@ -94,7 +94,7 @@ class Jogo():
             nuvens.append(nuvem)
 
         solos = []
-        quantidade_solo = math.ceil(self.largura_tela / 240)
+        quantidade_solo = math.ceil(self.largura_tela / 240) + 1
         for i in range(0, quantidade_solo):
             solo = Chao(i, self.altura_tela)
             solos.append(solo)
@@ -142,17 +142,26 @@ class Jogo():
             # O JOGO TA AQUI XDD
             if not pausado and not morte:
                 # movimentação da tela de fundo e nuvens
-                for nuvem in nuvens:
+                for pos, nuvem in enumerate(nuvens):
                     nuvem.mover()
+                    if nuvem.rect.right < 0:
+                        nuvem.rect.x = nuvens[pos - 1].rect.right - 2
+                    
                     self.tela.blit(nuvem.image, nuvem.rect.topleft)
                 
-                for fundo in fundos:
+                for pos, fundo in enumerate(fundos):
                     fundo.mover()
+                    if fundo.rect.right < 0:
+                        fundo.rect.x = fundos[pos - 1].rect.right - 5
+                    
                     self.tela.blit(fundo.image, fundo.rect.topleft)
 
                 # movimentação do solo
-                for solo in solos:
+                for pos, solo in enumerate(solos):
                     solo.mover()
+                    if solo.rect.right < 0:
+                        solo.rect.x = solos[pos - 1].rect.right - 10
+                    
                     self.tela.blit(solo.image, solo.rect.topleft)
 
                 # carregamento dos cajuzinho
@@ -170,19 +179,19 @@ class Jogo():
                 except:
                     pass
 
-                # gravidade
-                if capivara.rect.y + capivara.rect.height < self.altura_tela - 120:
-                    capivara.pulando = True
-                    capivara.cair()
-                else:
-                    capivara.zerar_gravidade()
-
                 # pulo
                 pular = pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_SPACE] or \
                     pygame.key.get_pressed()[K_UP] or pygame.mouse.get_pressed()[0]
                 if not capivara.pulando and pular:
                     capivara.pular()
                     
+                # gravidade
+                if capivara.rect.bottom < self.altura_tela - 120:
+                    capivara.cair()
+                    if capivara.rect.bottom > self.altura_tela - 120:
+                        capivara.rect.bottom = self.altura_tela - 120
+                else:
+                    capivara.zerar_gravidade()
 
                 # cactos
                 numero_aleatorio = 0
@@ -233,24 +242,7 @@ class Jogo():
                                 capivara.vidas -= 1
 
                 # reset
-                if capivara.vidas == 0:
-                    self.som_morte.play()
-                    morte = True
                 
-                if colisão_com_cacto:
-                    temporizador += 1
-                    if temporizador == 1 and capivara.vidas != 0 and not reinicio_agora:
-                        self.som_colisão_cacto.play()
-                    if 20 > temporizador > 0 and not reinicio_agora:
-                        capivara.image = imagem_vazio
-                    else:
-                        capivara.image = capivara.animações[int(capivara.atual)]
-                        capivara.mover = True
-                        capivara.update()
-                    if temporizador == 60:
-                        colisão_com_cacto = False
-                    elif temporizador > 60:
-                        temporizador = 0
 
                 # cajuzinho extra
                 numero_aleatorio_cajuzinho = randint(0, 1000)
@@ -273,16 +265,12 @@ class Jogo():
                     cajuzinho_extra_na_tela = False
 
 
-                # aumento de velocidade
-                if 0 < Terreno.velocidade < 10:
-                    Terreno.velocidade += 0.001
                 
                 # aumento da pontuação e atualização delas
                 if Terreno.velocidade > 0:
                     pontuação += int(Terreno.velocidade)
 
-                if not colisão_com_cacto and Terreno.velocidade > 0:
-                    capivara.update()
+                capivara.update()
 
                 
                 

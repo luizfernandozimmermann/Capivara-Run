@@ -2,11 +2,9 @@ import pygame
 
 class Capivara(pygame.sprite.Sprite):
     aceleracao_y = 0
-    velocidade_y = 0
     morta = False
     pulando = False
     vidas = 3
-    movendo = False
     atual = 0
 
     def __init__(self, altura_inicial):
@@ -48,22 +46,21 @@ class Capivara(pygame.sprite.Sprite):
     def zerar_gravidade(self):
         self.pulando = False
         self.aceleracao_y = 0
-        self.velocidade_y = 0
 
     def pular(self):
         self.som_pulo.play()
+        self.pulando = True
         # TODO: verificar se a gravidade está boa
-        self.aceleracao_y = -25
+        self.aceleracao_y = -26
+        self.cair()
 
     def cair(self):
         self.aceleracao_y += 1
-        self.velocidade_y += self.aceleracao_y
-        self.rect.y += self.velocidade_y
+        self.rect.y += self.aceleracao_y
 
     def update(self):
-        if self.movendo:
-            self.atual += 0.2
-            if self.atual >= 4:
-                self.atual = 0
-            self.image = self.imagens_animacoes[int(self.atual)]
-            self.image = pygame.transform.scale(self.image, (180, 180))
+        self.atual += 0.2
+        if self.atual >= 4:
+            self.atual = 0
+        self.image = self.imagens_animacoes[int(self.atual)]
+        self.image = pygame.transform.scale(self.image, (180, 180))
