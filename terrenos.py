@@ -1,7 +1,7 @@
 import pygame
 
 class Terreno:
-    velocidade = 0
+    velocidade = 10
     constante = 1
     def mover(self):
         self.rect.x -= int(self.velocidade * self.constante)
