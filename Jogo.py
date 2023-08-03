@@ -77,7 +77,6 @@ class Jogo():
         aguas.append(agua_saida)
 
         # cajuzinho
-        cajuzinho = Cajuzinho()
         cajuzinho_extra = Cajuzinho_extra(self.largura_tela, self.altura_tela - 120 - 80 - 30)
         cajuzinho_extra_na_tela = False
 
@@ -94,7 +93,7 @@ class Jogo():
             nuvens.append(nuvem)
 
         solos = []
-        quantidade_solo = math.ceil(self.largura_tela / 240) + 1
+        quantidade_solo = math.ceil(self.largura_tela / 240) + 2
         for i in range(0, quantidade_solo):
             solo = Chao(i, self.altura_tela)
             solos.append(solo)
@@ -141,44 +140,36 @@ class Jogo():
 
             # O JOGO TA AQUI XDD
             if not pausado and not morte:
+                if Terreno.velocidade < 22.5:
+                    Terreno.velocidade += 0.005
+
                 # movimentação da tela de fundo e nuvens
                 for pos, nuvem in enumerate(nuvens):
-                    nuvem.mover()
                     if nuvem.rect.right < 0:
-                        nuvem.rect.x = nuvens[pos - 1].rect.right - 2
+                        nuvem.rect.x = nuvens[pos - 1].rect.right
+                    nuvem.mover()
                     
                     self.tela.blit(nuvem.image, nuvem.rect.topleft)
                 
                 for pos, fundo in enumerate(fundos):
-                    fundo.mover()
                     if fundo.rect.right < 0:
-                        fundo.rect.x = fundos[pos - 1].rect.right - 5
+                        fundo.rect.x = fundos[pos - 1].rect.right
+                    fundo.mover()
                     
                     self.tela.blit(fundo.image, fundo.rect.topleft)
 
                 # movimentação do solo
                 for pos, solo in enumerate(solos):
-                    solo.mover()
                     if solo.rect.right < 0:
-                        solo.rect.x = solos[pos - 1].rect.right - 10
+                        solo.rect.x = solos[pos - 1].rect.right
+                    solo.mover()
                     
                     self.tela.blit(solo.image, solo.rect.topleft)
 
-                # carregamento dos cajuzinho
+                # carregamento das vidas
                 for c in range(0, capivara.vidas):
-                    self.tela.blit(cajuzinho.image, (c * 100 + 20, 20))
+                    self.tela.blit(capivara.vida_imagem, (c * 100 + 20, 20))
                 
-                
-                # deletando cactos que ja foram
-                try:
-                    for c in range(0, len(cactos_colocados_em_campo)):
-                        if cactos_colocados_em_campo[c].posição[0] + cactos_colocados_em_campo[c].tamanho[0] < 0:
-                            del cactos_colocados_em_campo[c]
-                        cactos_colocados_em_campo[c].posição[0] -=Terreno.velocidade
-                        self.tela.blit(cactos_colocados_em_campo[c].image, (cactos_colocados_em_campo[c].posição[0], cactos_colocados_em_campo[c].posição[1]))          
-                except:
-                    pass
-
                 # pulo
                 pular = pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_SPACE] or \
                     pygame.key.get_pressed()[K_UP] or pygame.mouse.get_pressed()[0]
@@ -192,6 +183,17 @@ class Jogo():
                         capivara.rect.bottom = self.altura_tela - 120
                 else:
                     capivara.zerar_gravidade()
+                
+                """# deletando cactos que ja foram
+                try:
+                    for c in range(0, len(cactos_colocados_em_campo)):
+                        if cactos_colocados_em_campo[c].posição[0] + cactos_colocados_em_campo[c].tamanho[0] < 0:
+                            del cactos_colocados_em_campo[c]
+                        cactos_colocados_em_campo[c].posição[0] -=Terreno.velocidade
+                        self.tela.blit(cactos_colocados_em_campo[c].image, (cactos_colocados_em_campo[c].posição[0], cactos_colocados_em_campo[c].posição[1]))          
+                except:
+                    pass"""
+
 
                 # cactos
                 numero_aleatorio = 0
