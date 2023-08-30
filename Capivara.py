@@ -33,6 +33,7 @@ class Capivara(pygame.sprite.Sprite):
 
         self.image = self.imagens_animacoes[self.atual]
         self.rect = self.image.get_rect()
+        self.altura_inicial = altura_inicial
         self.rect.y = altura_inicial
         self.rect.x = 200
 
@@ -44,6 +45,9 @@ class Capivara(pygame.sprite.Sprite):
         self.zerar_gravidade()
         self.morta = False
         self.vidas = 3
+        self.rect.x = 200
+        self.rect.y = self.altura_inicial
+        self.tempo_invisivel = 0
 
     def zerar_gravidade(self):
         self.pulando = False

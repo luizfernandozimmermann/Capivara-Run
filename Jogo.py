@@ -28,61 +28,53 @@ class Jogo():
         
         self.carregar_audios()
 
-        while True:
-            # TODO: self.carregar_menu()
-            self.carregar_jogo()
+        self.jogar()
 
     def carregar_audios(self):
-        self.som_amogus = pygame.mixer.Sound("audios/amogus.wav")
-        self.som_amogus.set_volume(0.05)
-
         self.som_colisao_cacto = pygame.mixer.Sound("audios/dano_cacto.wav")
         self.som_colisao_cacto.set_volume(0.2)
 
-        self.som_cajuzinho_extra = pygame.mixer.Sound("audios/cajuzinho_extra.wav")
-        self.som_cajuzinho_extra.set_volume(1)
-
         self.som_morte = pygame.mixer.Sound("audios/morte.wav")
         self.som_morte.set_volume(0.1)
-
         
+        pygame.mixer.music.set_volume(0.05)
+        self.musica_de_fundo = pygame.mixer.music.load("audios/musica_de_fundo.mp3")
+        pygame.mixer.music.play(-1)  
 
-        self.som_onça_chegando = pygame.mixer.Sound("audios/onça_chegando.wav")
-        self.som_onça_chegando.set_volume(0.1)
-
-        self.som_botao = pygame.mixer.Sound("audios/botões_audio.wav")
-        self.som_botao.set_volume(0.6)
-
-    def carregar_jogo(self):
-        # caracteristicas do jogo
-        self.pontuacao = 0
-        
-        # botao
-        botao_pausar = Botao("pause", self.largura_tela - 128, 0, 128)
-
-        # capivara
-        capivara = Capivara(self.altura_tela - 301)
-
+    def carregar_fundos_e_obstaculos(self):
         # Terrenos
-        fundos : list[FundoTerreno] = []
-        nuvens : list[FundoNuvem] = []
+        self.fundos : list[FundoTerreno] = []
+        self.nuvens : list[FundoNuvem] = []
         quantidade_imagens_fundo = math.ceil(self.largura_tela / self.altura_tela) + 1
         for i in range(0, quantidade_imagens_fundo):
             posicao_x = i * self.altura_tela
             fundo = FundoTerreno(posicao_x, self.altura_tela)
-            fundos.append(fundo)
+            self.fundos.append(fundo)
 
             nuvem = FundoNuvem(posicao_x, self.altura_tela)
-            nuvens.append(nuvem)
+            self.nuvens.append(nuvem)
 
-        solos : list[Chao] = []
+        self.solos : list[Chao] = []
         quantidade_solo = math.ceil(self.largura_tela / 240) + 2
         for i in range(0, quantidade_solo):
             solo = Chao(i, self.altura_tela)
-            solos.append(solo)
+            self.solos.append(solo)
 
         # cactos
-        cactos : list[Obstaculo] = []
+        self.cactos : list[Obstaculo] = []
+
+    def jogar(self):
+        # caracteristicas do jogo
+        self.pontuacao = 0
+        
+        # botao
+        botao_pausar = Botao("pause", self.largura_tela - 128, 0, 128, self.pausar)
+
+        # self.capivara
+        self.capivara = Capivara(self.altura_tela - 301)
+
+        #Terrenos
+        self.carregar_fundos_e_obstaculos()
         tempo_ultimo_cacto = datetime.now()
 
         while True:
@@ -91,7 +83,7 @@ class Jogo():
             x_mouse, y_mouse = pygame.mouse.get_pos()
 
             if botao_pausar.rect.collidepoint(x_mouse, y_mouse) and pygame.mouse.get_pressed()[0]:
-                self.pausar()
+                botao_pausar.click()
                 
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -110,58 +102,59 @@ class Jogo():
                 self.pontuacao_maxima = self.pontuacao
 
             # movimentação da tela de fundo, nuvens e solos
-            for pos, nuvem in enumerate(nuvens):
-                nuvem.mover(nuvens[pos - 1].rect.right)
+            for pos, nuvem in enumerate(self.nuvens):
+                nuvem.mover(self.nuvens[pos - 1].rect.right)
                 self.tela.blit(nuvem.image, nuvem.rect.topleft)
             
-            for pos, fundo in enumerate(fundos):
-                fundo.mover(fundos[pos - 1].rect.right)
+            for pos, fundo in enumerate(self.fundos):
+                fundo.mover(self.fundos[pos - 1].rect.right)
                 self.tela.blit(fundo.image, fundo.rect.topleft)
 
-            for pos, solo in enumerate(solos):
-                solo.mover(solos[pos - 1].rect.right)
+            for pos, solo in enumerate(self.solos):
+                solo.mover(self.solos[pos - 1].rect.right)
                 self.tela.blit(solo.image, solo.rect.topleft)
 
             # carregamento das vidas
-            for c in range(0, capivara.vidas):
-                self.tela.blit(capivara.vida_imagem, (c * 100 + 20, 20))
+            for c in range(0, self.capivara.vidas):
+                self.tela.blit(self.capivara.vida_imagem, (c * 100 + 20, 20))
             
-            # update da capivara
-            capivara.update(self.altura_tela)
+            # update da self.capivara
+            self.capivara.update(self.altura_tela)
             
             # pulo
             pular = pygame.key.get_pressed()[K_w] or pygame.key.get_pressed()[K_SPACE] or \
                 pygame.key.get_pressed()[K_UP] or \
                 (pygame.mouse.get_pressed()[0] and not botao_pausar.rect.collidepoint(x_mouse, y_mouse))
-            if not capivara.pulando and pular:
-                capivara.pular()
+            if not self.capivara.pulando and pular:
+                self.capivara.pular()
                 
             # geração e carregamento dos cactos
             tempo_agora = datetime.now()
             if tempo_agora - tempo_ultimo_cacto > timedelta(0, 3 - Objeto_movel.velocidade / 11.25):
-                cactos.append(Obstaculo(self.altura_tela, self.largura_tela))
+                self.cactos.append(Obstaculo(self.altura_tela, self.largura_tela))
                 tempo_ultimo_cacto = tempo_agora
                 
-            for cacto in cactos:
+            for cacto in self.cactos:
                 cacto.mover()
                 self.tela.blit(cacto.image, cacto.rect.topleft)
-                if capivara.colidiu(cacto) and not cacto.ja_colidiu:
+                if self.capivara.colidiu(cacto) and not cacto.ja_colidiu:
                     self.som_colisao_cacto.play()
-                    capivara.vidas -= 1
-                    capivara.tempo_invisivel += 1
+                    self.capivara.vidas -= 1
+                    self.capivara.tempo_invisivel += 1
                     cacto.ja_colidiu = True
-                    if capivara.vidas == 0:
-                        self.finalizar_jogo()
-                        return
+                    if self.capivara.vidas == 0:
+                        self.morte()
+                        
+            for cacto in self.cactos:
                 if cacto.rect.right < 0:
-                    cactos.remove(cacto)
+                    self.cactos.remove(cacto)
                 
             pontuacao_texto = texto(f"Pontuação: {str(self.pontuacao)}")
             pontuacao_maxima_texto = texto(f"Recorde: {str(self.pontuacao_maxima)}")
             
             self.tela.blit(pontuacao_texto, (20, self.altura_tela - 60))
             self.tela.blit(pontuacao_maxima_texto, (self.largura_tela // 2, self.altura_tela - 60))
-            self.tela.blit(capivara.image, capivara.rect.topleft)
+            self.tela.blit(self.capivara.image, self.capivara.rect.topleft)
             self.tela.blit(botao_pausar.image, botao_pausar.rect)
 
             pygame.display.update()
@@ -173,7 +166,20 @@ class Jogo():
             conteudo["pontuacao_maxima"] = self.pontuacao
             salvar(conteudo)
 
-    def pausar(self):
+    def morte(self):
+        self.som_morte.play()
+        
+        botao_restart   = Botao("restart", 
+                                (self.largura_tela - (128 * 2 + 50 * 1)) // 2 + (128 + 50) * 0, 
+                                (self.altura_tela - 128) // 2, 128, self.resetar)
+        botao_sair      = Botao("sair", 
+                                (self.largura_tela - (128 * 2 + 50 * 1)) // 2 + (128 + 50) * 1, 
+                                (self.altura_tela - 128) // 2, 128, exit)
+        
+        botoes : pygame.sprite.Group[Botao] = pygame.sprite.Group(
+            botao_restart,
+            botao_sair
+        )
         while True:
             self.tela.fill((50, 50, 50))
             self.relogio.tick(self.fps)
@@ -187,6 +193,72 @@ class Jogo():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         return
+                    
+            if pygame.mouse.get_pressed()[0]:                
+                if botao_restart.rect.collidepoint(x_mouse, y_mouse):
+                    botao_restart.click()
+                    return
+                
+                if botao_sair.rect.collidepoint(x_mouse, y_mouse):
+                    botao_sair.click()
+                    
+            for botao in botoes:
+                self.tela.blit(botao.image, botao.rect.topleft)
 
             pygame.display.update()
+    
+    def pausar(self):
+        botao_continuar = Botao("continuar", 
+                                (self.largura_tela - (128 * 3 + 50 * 2)) // 2 + (128 + 50) * 0, 
+                                (self.altura_tela - 128) // 2, 128)
+        botao_restart   = Botao("restart", 
+                                (self.largura_tela - (128 * 3 + 50 * 2)) // 2 + (128 + 50) * 1, 
+                                (self.altura_tela - 128) // 2, 128, self.resetar)
+        botao_sair      = Botao("sair", 
+                                (self.largura_tela - (128 * 3 + 50 * 2)) // 2 + (128 + 50) * 2, 
+                                (self.altura_tela - 128) // 2, 128, exit)
+        
+        botoes : pygame.sprite.Group[Botao] = pygame.sprite.Group(
+            botao_continuar,
+            botao_restart,
+            botao_sair
+        )
+
+        while True:
+            self.tela.fill((50, 50, 50))
+            self.relogio.tick(self.fps)
+            x_mouse, y_mouse = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    exit()
+                    
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return
+                    
+            if pygame.mouse.get_pressed()[0]:
+                if botao_continuar.rect.collidepoint(x_mouse, y_mouse):
+                    botao_continuar.click()
+                    return
+                
+                if botao_restart.rect.collidepoint(x_mouse, y_mouse):
+                    botao_restart.click()
+                    return
+                
+                if botao_sair.rect.collidepoint(x_mouse, y_mouse):
+                    botao_sair.click()
+                    
+            for botao in botoes:
+                self.tela.blit(botao.image, botao.rect.topleft)
+                
+            pygame.display.update()
+            
+    def resetar(self):
+        self.capivara.resetar_atributos()
+        self.finalizar_jogo()
+        self.pontuacao = 0
+        Objeto_movel.velocidade = 11
+        self.carregar_fundos_e_obstaculos()
             
