@@ -1,13 +1,8 @@
 import pygame
-
-class Terreno:
-    velocidade = 11
-    constante = 1
-    def mover(self):
-        self.rect.x -= int(self.velocidade * self.constante)
+from classes import Objeto_movel
 
 
-class FundoTerreno(pygame.sprite.Sprite, Terreno):
+class FundoTerreno(pygame.sprite.Sprite, Objeto_movel):
     def __init__(self, x, altura_tela):
         pygame.sprite.Sprite.__init__(self)
 
@@ -19,7 +14,7 @@ class FundoTerreno(pygame.sprite.Sprite, Terreno):
         self.rect.y = -120  # para não ficar atrás do chão
         
 
-class FundoNuvem(pygame.sprite.Sprite, Terreno):
+class FundoNuvem(pygame.sprite.Sprite, Objeto_movel):
     def __init__(self, x, altura_tela):
         pygame.sprite.Sprite.__init__(self)
 
@@ -30,7 +25,7 @@ class FundoNuvem(pygame.sprite.Sprite, Terreno):
         self.rect.x = x
 
 
-class Chao(pygame.sprite.Sprite, Terreno):
+class Chao(pygame.sprite.Sprite, Objeto_movel):
     def __init__(self, x, altura_tela):
         pygame.sprite.Sprite.__init__(self)
 

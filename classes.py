@@ -1,31 +1,13 @@
 import pygame
 
 
-
-
-
-class Cacto(pygame.sprite.Sprite):
-    def __init__(self, imagem, tamanho, largura_tela, altura_tela, proporção_altura=1, proporção_largura=1):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.proporção = proporção_altura
-        self.largura = proporção_largura
-        self.tamanho = [tamanho * proporção_largura, tamanho * proporção_altura]
-        self.image = pygame.image.load("sprites/objetos/cacto_" + str(imagem) + ".png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.tamanho[0], self.tamanho[1]))
-        self.posição = [largura_tela, altura_tela - self.tamanho[0] - 110 - tamanho * (proporção_altura - 1)]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (self.posição[0], self.posição[1])
-
-
-class Botão(pygame.sprite.Sprite):
-    def __init__(self, imagem, x, y, tamanho):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.tamanho = tamanho
-        self.posição = [x, y]
-        self.image = pygame.image.load("sprites/botoes/botão_" + str(imagem) + ".png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (tamanho, tamanho))
+class Objeto_movel:
+    velocidade = 11
+    constante = 1
+    def mover(self : pygame.Surface, pos_final : int):
+        if self.rect.right < 0:
+            self.rect.x = pos_final
+        self.rect.x -= int(self.velocidade * self.constante)
 
 
 class Cajuzinho(pygame.sprite.Sprite):
@@ -86,3 +68,4 @@ class Logo(pygame.sprite.Sprite):
     def amogus(self):
         self.image = pygame.image.load("sprites/extras/logo_sus.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (self.tamanho, self.tamanho))
+        
